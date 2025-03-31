@@ -32,7 +32,6 @@ module.exports = {
         categoryModel.findOne({ isDeleted: false, tenLoai: body.category }),
       ]);
 
-      
       let newProduct = new productModel();
       newProduct.tenSp = body.tenSp;
       newProduct.giaBan = parseInt(body.giaBan, 10);
@@ -40,24 +39,29 @@ module.exports = {
       newProduct.moTa = body.moTa;
       newProduct.anhDaiDien = body.anhDaiDien;
       newProduct.soLuongCon = parseInt(body.soLuongCon, 10);
-      newProduct.category = category._id
-      newProduct.brand = brand._id
-      console.log("Babeê");
-  
-      console.log(body.user)
-      newProduct.user = body.user._id
+      newProduct.category = category._id;
+      newProduct.brand = brand._id;
 
+      newProduct.user = body.user._id;
 
-      console.log(newProduct);
-
-      if (body.images) {
-        let imageProduct = await imageProductModel.insertMany({
-          url: body.images.path,
+      let imageIds = [];
+      for (const image of body.images) {
+        let imageProduct = new imageProductModel({
+          url: image.path,
           productId: newProduct._id,
         });
-        body.images = imageProduct.map((image) => image._id);
+        await imageProduct.save();
+        imageIds.push(imageProduct._id);
       }
-      newProduct.images = body.images;
+
+      // if (body.images) {
+      //   let imageProduct = await imageProductModel.insertMany({
+      //     url: body.images.path,
+      //     productId: newProduct._id,
+      //   });
+      //   body.images = imageProduct.map((image) => image._id);
+      // }
+      newProduct.images = imageIds;
 
       return await newProduct.save();
     } catch (error) {
