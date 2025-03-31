@@ -11,23 +11,17 @@ let {
 let constants = require("../utils/constants");
 
 const multer = require("multer");
-const path = require("path");
 
 /* GET users listing. */
 router.get("/", async function (req, res, next) {
-  let products = await productModel
-    .find({
-      isDeleted: false,
-    })
-    .populate("category");
+  let page = req.params.page || 1;
+  let pageSize = req.params.pageSize || 10;
+  let products = await productController.getAllProduct(page, pageSize);
   CreateSuccessRes(res, products, 200);
 });
 router.get("/:id", async function (req, res, next) {
   try {
-    let product = await productModel.findOne({
-      _id: req.params.id,
-      isDeleted: false,
-    });
+    let product = await productController.getAProduct(req.params.id);
     CreateSuccessRes(res, product, 200);
   } catch (error) {
     next(error);
@@ -64,7 +58,6 @@ const upload = multer({
 // API để upload nhiều file ảnh
 router.post(
   "/",
-
   check_authentication,
   check_authorization(constants.ADMIN_PERMISSION),
   upload.array("images", 10),
@@ -83,7 +76,7 @@ router.post(
       body.images = fileUrls;
       body.anhDaiDien = fileUrls[0].path;
       body.user = req.user;
-      let result = await productController.createProduct(req.body);
+      let result = await productController.createProduct(body);
 
       CreateSuccessRes(res, result, 200);
     } catch (error) {
@@ -91,43 +84,37 @@ router.post(
     }
   }
 );
-router.put("/:id", async function (req, res, next) {
-  let id = req.params.id;
-  try {
-    let body = req.body;
-    let updatedInfo = {};
-    if (body.name) {
-      updatedInfo.name = body.name;
+router.put(
+  "/:id",
+  check_authentication,
+  check_authorization(constants.MOD_PERMISSION),
+  upload.array("images", 10),
+  async function (req, res, next) {
+    try {
+      const files = req.files;
+      const id = req.params.id;
+      if (!files || files.length === 0) {
+        throw new Error("Không tìm thấy file ảnh nào!");
+      }
+      const fileUrls = files.map((file) => ({
+        path: `/public/product/${file.filename}`,
+      }));
+      let body = req.body;
+      body.images = fileUrls;
+      body.anhDaiDien = fileUrls[0].path;
+      body.user = req.user;
+      console.log(body);
+      let result = await productController.updateProduct(id, body);
+      CreateSuccessRes(res, result, 200);
+    } catch (error) {
+      next(error);
     }
-    if (body.price) {
-      updatedInfo.price = body.price;
-    }
-    if (body.quantity) {
-      updatedInfo.quantity = body.quantity;
-    }
-    if (body.category) {
-      updatedInfo.category = body.category;
-    }
-    let updateProduct = await productModel.findByIdAndUpdate(id, updatedInfo, {
-      new: true,
-    });
-    CreateSuccessRes(res, updateProduct, 200);
-  } catch (error) {
-    next(error);
   }
-});
+);
 router.delete("/:id", async function (req, res, next) {
-  let id = req.params.id;
   try {
-    let body = req.body;
-    let updateProduct = await productModel.findByIdAndUpdate(
-      id,
-      {
-        isDeleted: true,
-      },
-      { new: true }
-    );
-    CreateSuccessRes(res, updateProduct, 200);
+    let result = await productController.deleteProduct(req.params.id);
+    CreateSuccessRes(res, result, 200);
   } catch (error) {
     next(error);
   }

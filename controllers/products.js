@@ -15,10 +15,21 @@ module.exports = {
         .find({
           isDeleted: false,
         })
-        .populate("category")
+        .populate(["category", "brand", "user", "images"])
         .skip((page - 1) * pageSize)
         .limit(pageSize);
       return products;
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getAProduct: async (id) => {
+    try {
+      let product = await productModel
+        .findById(id)
+        .populate(["category", "brand", "user", "images"]);
+      return product;
     } catch (error) {
       next(error);
     }
@@ -53,17 +64,73 @@ module.exports = {
         await imageProduct.save();
         imageIds.push(imageProduct._id);
       }
-
-      // if (body.images) {
-      //   let imageProduct = await imageProductModel.insertMany({
-      //     url: body.images.path,
-      //     productId: newProduct._id,
-      //   });
-      //   body.images = imageProduct.map((image) => image._id);
-      // }
       newProduct.images = imageIds;
 
       return await newProduct.save();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // update
+  updateProduct: async (id, body) => {
+    try {
+      let product = await productModel.findById(id);
+      const [brand, category] = await Promise.all([
+        brandModel.findOne({ isDeleted: false, tenLoai: body.brand }),
+        categoryModel.findOne({ isDeleted: false, tenLoai: body.category }),
+      ]);
+      if (body.tenSp != null) {
+        product.tenSp = body.tenSp;
+      }
+      if (body.giaBan != null) {
+        product.giaBan = parseInt(body.giaBan, 10);
+      }
+
+      if (body.giaNhap != null) {
+        product.giaNhap = parseInt(body.giaNhap, 10);
+      }
+
+      if (body.moTa != null) {
+        product.moTa = body.moTa;
+      }
+
+      if (body.soLuongCon != null) {
+        product.soLuongCon = parseInt(body.soLuongCon, 10);
+      }
+
+      if (body.category != null) {
+        product.category = category._id;
+      }
+
+      if (body.brand != null) {
+        product.brand = brand._id;
+      }
+
+      if (body.images != null) {
+        let imageIds = [];
+        for (const image of body.images) {
+          let imageProduct = new imageProductModel({
+            url: image.path,
+            productId: product._id,
+          });
+          await imageProduct.save();
+          imageIds.push(imageProduct._id);
+        }
+        product.images = imageIds;
+      }
+      return await product.save();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteProduct: async (id) => {
+    try {
+      let product = await productModel.findByIdAndUpdate(id, {
+        isDeleted: true,
+      });
+      return product;
     } catch (error) {
       throw error;
     }
