@@ -25,6 +25,11 @@ let productSchema = mongoose.Schema(
       type: String,
       default: "",
     },
+    phanTramGiam: {
+      type: Number,
+      default: 0,
+      min: 0,
+    }, 
     soLuongCon: {
       type: Number,
       default: 0,
@@ -47,11 +52,7 @@ let productSchema = mongoose.Schema(
         required: true,
       },
     ],
-    user: {
-      type: mongoose.Types.ObjectId,
-      ref: "user",
-      required: true,
-    },
+  
 
     isDeleted: {
       type: Boolean,

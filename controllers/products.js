@@ -53,8 +53,6 @@ module.exports = {
       newProduct.category = category._id;
       newProduct.brand = brand._id;
 
-      newProduct.user = body.user._id;
-
       let imageIds = [];
       for (const image of body.images) {
         let imageProduct = new imageProductModel({
