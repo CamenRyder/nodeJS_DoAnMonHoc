@@ -10,29 +10,21 @@ const user = require("../schemas/user");
 
 module.exports = {
   getAllProduct: async ({ page, pageSize }) => {
-    try {
-      let products = await productModel
-        .find({
-          isDeleted: false,
-        })
-        .populate(["category", "brand", "user", "images"])
-        .skip((page - 1) * pageSize)
-        .limit(pageSize);
-      return products;
-    } catch (error) {
-      next(error);
-    }
+    let products = await productModel
+      .find({
+        isDeleted: false,
+      })
+      .populate(["category", "brand", "images"])
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+    return products;
   },
 
   getAProduct: async (id) => {
-    try {
-      let product = await productModel
-        .findById(id)
-        .populate(["category", "brand", "user", "images"]);
-      return product;
-    } catch (error) {
-      next(error);
-    }
+    let product = await productModel
+    .findById(id)
+    .populate(["category", "brand",  "images"]);
+  return product;
   },
 
   createProduct: async (body) => {
