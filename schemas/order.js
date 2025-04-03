@@ -10,6 +10,10 @@ let orderSchema = mongoose.Schema(
       type: Number,
       default: "",
     },
+    totalQuantity: {
+      type: Number,
+      default: "",
+    },
     shippingAddress: {
       type: String,
       default: "",

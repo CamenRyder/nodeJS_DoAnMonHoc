@@ -14,6 +14,14 @@ let cartSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    totalQuanity: {
+      type: Number,
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

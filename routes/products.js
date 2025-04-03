@@ -93,15 +93,14 @@ router.put(
     try {
       const files = req.files;
       const id = req.params.id;
-      if (!files || files.length === 0) {
-        throw new Error("Không tìm thấy file ảnh nào!");
-      }
-      const fileUrls = files.map((file) => ({
-        path: `/public/product/${file.filename}`,
-      }));
       let body = req.body;
-      body.images = fileUrls;
-      body.anhDaiDien = fileUrls[0].path;
+      if (files.length != 0) {
+        const fileUrls = files.map((file) => ({
+          path: `/public/product/${file.filename}`,
+        }));
+        body.images = fileUrls;
+        body.anhDaiDien = fileUrls[0].path;
+      }
       body.user = req.user;
       console.log(body);
       let result = await productController.updateProduct(id, body);
@@ -111,6 +110,7 @@ router.put(
     }
   }
 );
+
 router.delete("/:id", async function (req, res, next) {
   try {
     let result = await productController.deleteProduct(req.params.id);

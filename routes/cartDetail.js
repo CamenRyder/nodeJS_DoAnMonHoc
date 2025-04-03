@@ -1,16 +1,74 @@
 var express = require("express");
 var router = express.Router();
 let cartDetailController = require("../controllers/cartDetail");
-
-// Get All Cart Detail
-router.get("/", async (req, res) => {
+let {
+  check_authentication,
+  check_authorization,
+} = require("../utils/check_auth");
+let constants = require("../utils/constants");
+const { CreateSuccessRes } = require("../utils/responseHandler");
+// Get All Cart Detail by CardId
+router.get(
+  "/GetAllByCartId/:id",
+  check_authentication,
+  check_authorization(constants.USER_PERMISSION),
+  async (req, res, next) => {
     try {
-        let cartDetails = await cartDetailController.GetAllCartDetail();
-        res.status(200).json(cartDetails);
+      let cartId = req.params.id;
+      let data = await cartDetailController.getAllCartByUserId(cartId);
+      CreateSuccessRes(res, data, 200);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      next(error);
     }
-});
+  }
+);
+// create cart detail
+router.post(
+  "/",
+  check_authentication,
+  check_authorization(constants.USER_PERMISSION),
+  async (req, res, next) => {
+    try {
+      let data = await cartDetailController.createACartDetail(req.body);
+      CreateSuccessRes(res, data, 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// update cart detail
+router.put(
+  "/:id",
+  check_authentication,
+  check_authorization(constants.USER_PERMISSION),
+  async (req, res, next) => {
+    try {
+      let data = await cartDetailController.updateACartDetail(
+        req.params.id,
+        req.body
+      );
+      CreateSuccessRes(res, data, 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// delete cart detail
+router.delete(
+  "/:id",
+  check_authentication,
+  check_authorization(constants.USER_PERMISSION),
+  async (req, res, next) => {
+    try {
+      let data = await cartDetailController.deleteACartDetail(req.params.id);
+      CreateSuccessRes(res, data, 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 // export the router
 module.exports = router;

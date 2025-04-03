@@ -5,7 +5,7 @@ let cartDetailSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    price: {
+    price: { // gia san pham x so luong => price
       type: Number,
       required: true,
     },
@@ -23,7 +23,6 @@ let cartDetailSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    
   },
   {
     timestamps: true,
